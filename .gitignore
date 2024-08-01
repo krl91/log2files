@@ -167,3 +167,4 @@ log2files_VENV/
 out*/
 *.log
 .DS_Store/
+.DS_Store
