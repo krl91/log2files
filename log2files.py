@@ -12,6 +12,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from tqdm import tqdm
 import webbrowser
+import multiprocessing
+import multiprocessing.popen_spawn_posix
 
 DEFAULT_CONFIG_PATH = "config.json"
 
@@ -189,7 +191,7 @@ def launch_gui(config):
     
     root.mainloop()
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Process XML, gz, or tar.gz files.")
     parser.add_argument("--config_path", type=str, help="Path to the configuration file (default: config.json)")
     parser.add_argument("--cli", action="store_true", help="Run in command-line mode")
@@ -198,4 +200,16 @@ if __name__ == "__main__":
     parser.add_argument("--filtered_element_numbers", type=str, default="", help="Filtered element numbers")
     args = parser.parse_args()
 
-    main(args)
+    config_path = args.config_path if args.config_path else DEFAULT_CONFIG_PATH
+    config = Config(config_path)
+    print(f"Config loaded: {config}")
+    print(f"Globals initialized: XML_PATTERN={config.XML_PATTERN}, ELEMENT_REF_XPATH={config.ELEMENT_REF_XPATH}")
+
+    if args.cli:
+        process_files(args.trace_file_path, args.output_dir, args.filtered_element_numbers, config)
+    else:
+        launch_gui(config)
+
+if __name__ == "__main__":
+    multiprocessing.freeze_support()
+    main()

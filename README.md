@@ -67,9 +67,13 @@ rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --outp
 
 About
 -----
-https://github.com/krl91/log2files
 
-Contact
--------
+Url: https://github.com/krl91/log2files
 
-krl.project _AT_ gmail (dot) com
+Contact: krl.project _AT_ gmail (dot) com
+
+Create an esecutable file
+-------------------------
+
+pip install pyinstaller
+pyinstaller --onefile --noconsole log2files.py
