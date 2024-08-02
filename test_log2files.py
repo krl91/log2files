@@ -122,13 +122,15 @@ class TestSimpleLogfileExtractor(unittest.TestCase):
     @patch('log2files.Config')
     @patch('log2files.process_files')
     @patch('argparse.ArgumentParser.parse_args')
-    def test_main_function(self, mock_parse_args, mock_process_files, mock_config):
+    @patch('builtins.exit')  # Ajoutez ce patch pour éviter SystemExit
+    def test_main_function(self, mock_exit, mock_parse_args, mock_process_files, mock_config):
         mock_args = MagicMock()
         mock_args.config_path = None
         mock_args.cli = True
         mock_args.trace_file_path = '/fake/path/to/trace.log'
         mock_args.output_dir = '/fake/output'
         mock_args.filtered_element_numbers = ''
+        mock_args.version = False  # Assurez-vous que l'option version est False pour ce test
         mock_parse_args.return_value = mock_args
 
         with patch('sys.argv', ['log2files.py', '--cli', '--trace_file_path', '/fake/path/to/trace.log']):
@@ -136,6 +138,9 @@ class TestSimpleLogfileExtractor(unittest.TestCase):
         
         mock_config.assert_called_once_with(DEFAULT_CONFIG_PATH)
         mock_process_files.assert_called_once_with(mock_args.trace_file_path, mock_args.output_dir, mock_args.filtered_element_numbers, mock_config.return_value)
+        mock_exit.assert_not_called()  # Vérifiez que exit() n'a pas été appelé
+
+
 
 if __name__ == '__main__':
     unittest.main()

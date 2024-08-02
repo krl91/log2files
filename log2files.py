@@ -16,6 +16,7 @@ import webbrowser
 import base64
 
 DEFAULT_CONFIG_PATH = "config.json"
+CURRENT_VERSION = "v1.0.3r"
 
 def extract_element_number(element_ref):
     """Extract the element number from an element reference."""
@@ -157,6 +158,12 @@ def process_final_fragment(current_fragment, current_timestamp, output_dir, filt
 
 def main(args):
     """Load the configuration and either start the CLI or GUI based on the arguments."""
+    if args.version:
+        print(CURRENT_VERSION)
+        exit()
+    
+    print("Starting...")
+
     config_path = args.config_path if args.config_path else DEFAULT_CONFIG_PATH
     config = Config(config_path)
     print(f"Config loaded: {config}")
@@ -238,13 +245,13 @@ def launch_gui(config):
     root.mainloop()
 
 if __name__ == "__main__":
-    print("Starting...")
     parser = argparse.ArgumentParser(description="Process XML, gz, or tar.gz files.")
     parser.add_argument("--config_path", type=str, help="Path to the configuration file (default: config.json)")
     parser.add_argument("--cli", action="store_true", help="Run in command-line mode")
     parser.add_argument("--trace_file_path", type=str, help="Path to trace file")
     parser.add_argument("--output_dir", type=str, default="out", help="Output directory")
     parser.add_argument("--filtered_element_numbers", type=str, default="", help="Filtered element numbers")
+    parser.add_argument("--version", action="store_true", help="current version number")
     args = parser.parse_args()
 
     main(args)
