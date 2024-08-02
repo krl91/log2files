@@ -108,7 +108,23 @@ def process_files(trace_file_path, output_dir_path, filtered_element_numbers, co
     filtered_element_numbers_set = set(filtered_element_numbers.split(';')) if filtered_element_numbers else set()
     file_counters = defaultdict(int)
 
-    process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters)
+    if trace_file_path.suffix == '.gz':
+        process_compressed_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters)
+    elif trace_file_path.suffix == '.tar.gz':
+        process_tar_gz(trace_file_path, output_dir, filtered_element_numbers_set, config)
+    else:
+        process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters)
+
+def process_compressed_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters):
+    """Process a compressed log file (e.g., .gz), extracting and processing XML content."""
+    print(f"Processing compressed log file: {trace_file_path}")
+    
+    # Ouvrir le fichier gzippé et le lire comme texte
+    with gzip.open(trace_file_path, 'rt', encoding='utf-8') as file:
+        xml_content = file.read()
+        timestamp = extract_timestamp(xml_content)
+        process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
+
 
 def process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process the log file line by line, extracting and processing XML content."""
@@ -162,7 +178,7 @@ def launch_gui(config):
     """Launch the GUI interface for user interaction."""
     
     def browse_trace_file():
-        file_path = filedialog.askopenfilename(filetypes=[("Log Files", "*.log"), ("All Files", "*.*")])
+        file_path = filedialog.askopenfilename(filetypes=[("Log Files", "*.log;*.gz"), ("All Files", "*.*")])
         if file_path:
             trace_file_entry.delete(0, tk.END)
             trace_file_entry.insert(0, file_path)
