@@ -168,3 +168,6 @@ out*/
 *.log
 .DS_Store/
 .DS_Store
+log2files
+log2files.pyKO
+rename_file.sh
