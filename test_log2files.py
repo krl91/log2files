@@ -35,7 +35,7 @@ class TestSimpleLogfileExtractor(unittest.TestCase):
 
         write_xml_fragment(output_dir, element_number, fragment, timestamp, file_counters)
 
-        expected_filename = output_dir / f"course_{element_number}_0_{timestamp}.xml"
+        expected_filename = output_dir / f"msg_{element_number}_0_{timestamp}.xml"
         mock_open_obj.assert_called_once_with(expected_filename, 'w', encoding='utf-8')
         mock_open_obj().write.assert_called_once_with(fragment)
         self.assertEqual(file_counters[element_number], 1)
@@ -132,10 +132,10 @@ class TestSimpleLogfileExtractor(unittest.TestCase):
         mock_parse_args.return_value = mock_args
 
         with patch('sys.argv', ['log2files.py', '--cli', '--trace_file_path', '/fake/path/to/trace.log']):
-            main()
+            main(mock_args)  # Passer mock_args à main
         
         mock_config.assert_called_once_with(DEFAULT_CONFIG_PATH)
-        mock_process_files.assert_called_once()
+        mock_process_files.assert_called_once_with(mock_args.trace_file_path, mock_args.output_dir, mock_args.filtered_element_numbers, mock_config.return_value)
 
 if __name__ == '__main__':
     unittest.main()
