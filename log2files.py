@@ -14,7 +14,6 @@ from tkinter import filedialog, messagebox
 from tqdm import tqdm
 import webbrowser
 import base64
-import warnings
 
 DEFAULT_CONFIG_PATH = "config.json"
 
@@ -54,6 +53,7 @@ def process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, con
 def process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters):
     """Process the entire XML content, extracting and handling relevant fragments."""
     xml_fragments = config.XML_PATTERN.findall(xml_content)
+    #for fragment in tqdm(xml_fragments, desc="Processing xml_fragments", unit="fragment"):
     for fragment in xml_fragments:
         process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
@@ -118,13 +118,9 @@ def process_files(trace_file_path, output_dir_path, filtered_element_numbers, co
 def process_compressed_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process a compressed log file (e.g., .gz), extracting and processing XML content."""
     print(f"Processing compressed log file: {trace_file_path}")
-    
-    # Ouvrir le fichier gzippé et le lire comme texte
-    with gzip.open(trace_file_path, 'rt', encoding='utf-8') as file:
-        xml_content = file.read()
-        timestamp = extract_timestamp(xml_content)
-        process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
-
+    xml_content = read_file_content(trace_file_path)
+    timestamp = extract_timestamp(xml_content)
+    process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
 def process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process the log file line by line, extracting and processing XML content."""
@@ -178,7 +174,7 @@ def launch_gui(config):
     """Launch the GUI interface for user interaction."""
     
     def browse_trace_file():
-        file_path = filedialog.askopenfilename(filetypes=[("Log Files", "*.log;*.gz"), ("All Files", "*.*")])
+        file_path = filedialog.askopenfilename(filetypes=[("Log Files", "*.log *.gz"), ("All Files", "*.*")])
         if file_path:
             trace_file_entry.delete(0, tk.END)
             trace_file_entry.insert(0, file_path)
