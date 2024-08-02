@@ -18,9 +18,6 @@ import warnings
 
 DEFAULT_CONFIG_PATH = "config.json"
 
-warnings.filterwarnings("ignore", category=UserWarning, module='multiprocessing.resource_tracker')
-sys.stderr = open(os.devnull, 'w')
-
 def extract_element_number(element_ref):
     """Extract the element number from an element reference."""
     return element_ref.split(':')[-1]
@@ -105,7 +102,7 @@ def initialize_output_dir(output_dir):
 def process_files(trace_file_path, output_dir_path, filtered_element_numbers, config):
     """Main function to process log files, extract XML fragments, and save them."""
     trace_file_path = Path(trace_file_path)
-    output_dir = Path(output_dir_path.strip() or "out")
+    output_dir = Path(str(output_dir_path).strip() or "out")
     initialize_output_dir(output_dir)
 
     filtered_element_numbers_set = set(filtered_element_numbers.split(';')) if filtered_element_numbers else set()
