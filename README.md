@@ -63,14 +63,16 @@ rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --outp
  
 rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --output_dir out --filtered_journey_numbers 992 --config_path config.json&& diff -rq ./out ./out.992.ref
 
-rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --output_dir out --filtered_journey_numbers "992;991" --config_path config.json && diff -rq ./out ./out.992.991.ref
+rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --output_dir out --filtered_element_numbers "992;991" --config_path config.json && diff -rq ./out ./out.992.991.ref
+
+rm -rf ./out && time python log2files.py --cli --trace_file_path file.log.gz --output_dir out --config_path config.json && diff -rq ./out ./out.gz.ref
+
+rm -rf ./out && time python log2files.py --cli --trace_file_path file.log.gz --output_dir out --filtered_element_numbers "433;24" --config_path config.json && diff -rq ./out ./out.gz.433.24.ref
 
 About
 -----
 
 Url: https://github.com/krl91/log2files
-
-Contact: krl.project _AT_ gmail (dot) com
 
 Create an esecutable file
 -------------------------

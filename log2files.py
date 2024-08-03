@@ -16,7 +16,7 @@ import webbrowser
 import base64
 
 DEFAULT_CONFIG_PATH = "config.json"
-CURRENT_VERSION = "v1.0.3r"
+CURRENT_VERSION = "v1.0.3"
 
 def extract_element_number(element_ref):
     """Extract the element number from an element reference."""

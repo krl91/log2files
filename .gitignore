@@ -166,6 +166,7 @@ __pycache__/
 log2files_VENV/
 out*/
 *.log
+*.gz
 .DS_Store/
 .DS_Store
 log2files
