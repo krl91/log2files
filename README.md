@@ -19,7 +19,7 @@ sudo dnf install python3-tkinter
 
 pip install -r requirements.txt
 
--Windows
+- Windows
 
 pip install tk
 
