@@ -1,6 +1,18 @@
 Installation
 ------------
 
+Download the zip file according to your OS.
+Unzip it.
+
+Download the config.json file and modify it according to the log file to be parsed.
+
+Config file should be at the same folder as the executable file.
+
+By default the gui is launched.
+
+Installation from sources
+-------------------------
+
 - MacOS
 
 brew install python-tk
@@ -78,4 +90,5 @@ Create an esecutable file
 -------------------------
 
 pip install pyinstaller
+
 pyinstaller --onefile --noconsole log2files.py
