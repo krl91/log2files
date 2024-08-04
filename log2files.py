@@ -92,7 +92,8 @@ def process_tar_member(tar, member, output_dir, filtered_element_numbers_set, co
     if f:
         xml_content = f.read().decode('utf-8')
         timestamp = extract_timestamp(xml_content)
-        process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp)
+        file_counters = defaultdict(int) 
+        process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
 def initialize_output_dir(output_dir):
     """Initialize the output directory by clearing it if it exists or creating it."""
