@@ -19,7 +19,7 @@ from tqdm import tqdm
 from utils import Config
 
 DEFAULT_CONFIG_PATH = "config.json"
-CURRENT_VERSION = "v1.0.3"
+CURRENT_VERSION = "v1.0.4r"
 
 def setup_logging(debug):
     """Setup logging configuration based on the debug flag."""
