@@ -172,3 +172,5 @@ out*/
 log2files
 log2files.pyKO
 rename_file.sh
+test_datasets/
+new_gui.py
