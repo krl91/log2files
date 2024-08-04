@@ -41,6 +41,24 @@ pip install -r requirements.txt
 Usage
 -----
 
+log2files.py [-h] [--config_path CONFIG_PATH] [--cli] [--trace_file_path TRACE_FILE_PATH] [--output_dir OUTPUT_DIR] [--filtered_element_numbers FILTERED_ELEMENT_NUMBERS] [--version] [--debug]
+
+Process XML, gz, or tar.gz files.
+
+options:
+  -h, --help            show this help message and exit
+  --config_path CONFIG_PATH
+                        Path to the configuration file (default: config.json)
+  --cli                 Run in command-line mode
+  --trace_file_path TRACE_FILE_PATH
+                        Path to trace file
+  --output_dir OUTPUT_DIR
+                        Output directory
+  --filtered_element_numbers FILTERED_ELEMENT_NUMBERS
+                        Filtered element numbers
+  --version             current version number
+  --debug               Enable debug logging
+
 - With graphical interface 
 
 python log2files.py --config_path config.json
