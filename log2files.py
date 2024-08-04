@@ -21,6 +21,7 @@ from utils import Config
 DEFAULT_CONFIG_PATH = "config.json"
 CURRENT_VERSION = "v1.0.4r"
 
+
 def setup_logging(debug):
     """Setup logging configuration based on the debug flag."""
     if debug:
@@ -30,9 +31,11 @@ def setup_logging(debug):
     else:
         logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+
 def extract_element_number(element_ref):
     """Extract the element number from an element reference."""
     return element_ref.split(':')[-1]
+
 
 def extract_timestamp(line):
     """Extract the timestamp from a log line and format it for use in filenames."""
@@ -42,6 +45,7 @@ def extract_timestamp(line):
         return timestamp.replace(" ", "_").replace(":", "h", 1).replace(":", "m").replace(",", "s")
     return None
 
+
 def write_xml_fragment(output_dir, element_number, fragment, timestamp, file_counters):
     """Write a single XML fragment to a uniquely named file."""
     index = file_counters[element_number]
@@ -50,6 +54,7 @@ def write_xml_fragment(output_dir, element_number, fragment, timestamp, file_cou
         xml_file.write(fragment)
     file_counters[element_number] += 1
     logging.info("Wrote fragment for element %s to %s", element_number, filename)
+
 
 def process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, config, timestamp, file_counters):
     """Process and save an XML fragment if it matches the filter criteria."""
@@ -68,6 +73,7 @@ def process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, con
     except Exception as e:
         logging.error("Error processing XML fragment: %s", e)
 
+
 def process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters):
     """Process the entire XML content, extracting and handling relevant fragments."""
     xml_fragments = config.XML_PATTERN.findall(xml_content)
@@ -75,10 +81,12 @@ def process_xml_content(xml_content, output_dir, filtered_element_numbers_set, c
     for fragment in tqdm(xml_fragments, desc="Processing xml_fragments", unit="fragment", leave=False):
         process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
+
 def get_pu():
     """Return the decoded URL."""
     encoded_url = b'aHR0cHM6Ly9naXRodWIuY29tL2tybDkxL2xvZzJmaWxlcw=='
     return base64.b64decode(encoded_url).decode('utf-8')
+
 
 def read_file_content(file_path):
     """Read and return the content of a file, handling gzip files if necessary."""
@@ -86,15 +94,18 @@ def read_file_content(file_path):
         return read_gzip_file(file_path)
     return read_plain_file(file_path)
 
+
 def read_gzip_file(file_path):
     """Read content from a gzip file."""
     with gzip.open(file_path, 'rt', encoding='utf-8') as file:
         return file.read()
 
+
 def read_plain_file(file_path):
     """Read content from a plain text file."""
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
+
 
 def process_tar_gz(file_path, output_dir, filtered_element_numbers_set, config):
     """Process a .tar.gz archive, extracting and processing contained XML files."""
@@ -102,6 +113,7 @@ def process_tar_gz(file_path, output_dir, filtered_element_numbers_set, config):
         for member in tar.getmembers():
             if member.isfile() and member.name.endswith('.xml'):
                 process_tar_member(tar, member, output_dir, filtered_element_numbers_set, config)
+
 
 def process_tar_member(tar, member, output_dir, filtered_element_numbers_set, config):
     """Extract and process an XML file from a tar member."""
@@ -112,11 +124,13 @@ def process_tar_member(tar, member, output_dir, filtered_element_numbers_set, co
         file_counters = defaultdict(int)
         process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
+
 def initialize_output_dir(output_dir):
     """Initialize the output directory by clearing it if it exists or creating it."""
     if output_dir.exists() and output_dir.is_dir():
         shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
+
 
 def process_files(trace_file_path, output_dir_path, filtered_element_numbers, config):
     """Main function to process log files, extract XML fragments, and save them."""
@@ -135,12 +149,14 @@ def process_files(trace_file_path, output_dir_path, filtered_element_numbers, co
     else:
         process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters)
 
+
 def process_compressed_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process a compressed log file (e.g., .gz), extracting and processing XML content."""
     logging.info("Processing compressed log file: %s", trace_file_path)
     xml_content = read_file_content(trace_file_path)
     timestamp = extract_timestamp(xml_content)
     process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
+
 
 def process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process the log file line by line, extracting and processing XML content."""
@@ -157,6 +173,7 @@ def process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, 
 
     process_final_fragment(current_fragment, current_timestamp, output_dir, filtered_element_numbers_set, config, file_counters)
 
+
 def process_log_line(line, current_timestamp, current_fragment, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process a single log line, updating the current fragment and timestamp."""
     timestamp = extract_timestamp(line)
@@ -170,11 +187,13 @@ def process_log_line(line, current_timestamp, current_fragment, output_dir, filt
         current_fragment.append(line)
     return current_timestamp, current_fragment
 
+
 def process_final_fragment(current_fragment, current_timestamp, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process the final XML fragment after all log lines have been read."""
     if current_fragment:
         xml_content = "".join(current_fragment)
         process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, current_timestamp, file_counters)
+
 
 def main(args):
     """Load the configuration and either start the CLI or GUI based on the arguments."""
@@ -198,6 +217,7 @@ def main(args):
         launch_gui(config)
 
     logging.info(get_pu())
+
 
 def launch_gui(config):
     """Launch the GUI interface for user interaction."""
@@ -254,7 +274,7 @@ def launch_gui(config):
     tk.Label(root, text="Filtered Element Numbers:").grid(row=2, column=0, padx=10, pady=10, sticky="e")
     filtered_element_numbers_entry = tk.Entry(root, width=50)
     filtered_element_numbers_entry.grid(row=2, column=1, padx=10, pady=10)
-    
+
     # Process files button
     process_button = tk.Button(root, text="Process Files", command=process_files_gui)
     process_button.grid(row=3, column=1, pady=20)
@@ -265,6 +285,7 @@ def launch_gui(config):
     github_link.bind("<Button-1>", open_g_l)
 
     root.mainloop()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process XML, gz, or tar.gz files.")
