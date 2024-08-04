@@ -1,3 +1,23 @@
+"""
+log2files.py
+
+This script processes log files to extract XML fragments based on certain 
+filters and saves them to an output directory.
+It supports processing of .log, .gz, and .tar.gz files and can be run via 
+CLI or GUI mode.
+
+Usage:
+    - CLI: python log2files.py 
+                  --cli 
+                  --trace_file_path <path> 
+                  --output_dir <output_dir> 
+                  --filtered_element_numbers <elements>
+    - GUI: python log2files.py (without --cli flag)
+
+Author: krl91
+Version: 1.0.4r
+"""
+
 import argparse
 import os
 import sys
@@ -29,7 +49,7 @@ def setup_logging(debug):
                             format="%(asctime)s - %(levelname)s - %(message)s")
         logging.debug("Debugging mode activated.")
     else:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def extract_element_number(element_ref):
@@ -78,7 +98,8 @@ def process_xml_content(xml_content, output_dir, filtered_element_numbers_set, c
     """Process the entire XML content, extracting and handling relevant fragments."""
     xml_fragments = config.XML_PATTERN.findall(xml_content)
     logging.debug("Found %d XML fragments to process", len(xml_fragments))
-    for fragment in tqdm(xml_fragments, desc="Processing xml_fragments", unit="fragment", leave=False):
+
+    for fragment in xml_fragments:
         process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
 
@@ -195,23 +216,23 @@ def process_final_fragment(current_fragment, current_timestamp, output_dir, filt
         process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, current_timestamp, file_counters)
 
 
-def main(args):
+def main(arguments):
     """Load the configuration and either start the CLI or GUI based on the arguments."""
-    setup_logging(args.debug)
+    setup_logging(arguments.debug)
 
-    if args.version:
+    if arguments.version:
         print(CURRENT_VERSION)
         sys.exit()
 
     logging.info("Starting...")
 
-    config_path = args.config_path if args.config_path else DEFAULT_CONFIG_PATH
+    config_path = arguments.config_path if arguments.config_path else DEFAULT_CONFIG_PATH
     config = Config(config_path)
     logging.info("Config loaded: %s", config)
     logging.info("Globals initialized: XML_PATTERN=%s, element_REF_XPATH=%s", config.XML_PATTERN, config.ELEMENT_REF_XPATH)
 
-    if args.cli:
-        process_files(args.trace_file_path, args.output_dir, args.filtered_element_numbers, config)
+    if arguments.cli:
+        process_files(arguments.trace_file_path, arguments.output_dir, arguments.filtered_element_numbers, config)
     else:
         logging.info("Loading GUI...")
         launch_gui(config)
@@ -249,7 +270,7 @@ def launch_gui(config):
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
 
-    def open_g_l(event):
+    def open_g_l():
         webbrowser.open_new(get_pu())
 
     # Create the main window for the GUI
