@@ -10,6 +10,7 @@ Config file should be at the same folder as the executable file.
 
 By default the gui is launched.
 
+
 Installation from sources
 -------------------------
 
@@ -50,7 +51,7 @@ python log2files.py
 
 - Command line:
 
-python log2files.py --cli --trace_file_path "./compressedfile.gz" --output_dir "out" --filtered_journey_numbers "107;22" --config_path config.json
+python log2files.py --cli --trace_file_path "./compressedfile.gz" --output_dir "out" --filtered_element_numbers "107;22" --config_path config.json
 
 Config file example
 -------------------
@@ -68,18 +69,10 @@ python -m unittest test_log2files.py
 python -m unittest test_utils.py
 
 
-Regression Tests on a Complete Dataset (need bash)
---------------------------------------------------
+Functionnal Tests on a Complete Dataset 
+---------------------------------------
 
-rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --output_dir out --config_path config.json && diff -rq ./out ./out.ref
- 
-rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --output_dir out --filtered_journey_numbers 992 --config_path config.json&& diff -rq ./out ./out.992.ref
-
-rm -rf ./out && time python log2files.py --cli --trace_file_path file.log --output_dir out --filtered_element_numbers "992;991" --config_path config.json && diff -rq ./out ./out.992.991.ref
-
-rm -rf ./out && time python log2files.py --cli --trace_file_path file.log.gz --output_dir out --config_path config.json && diff -rq ./out ./out.gz.ref
-
-rm -rf ./out && time python log2files.py --cli --trace_file_path file.log.gz --output_dir out --filtered_element_numbers "433;24" --config_path config.json && diff -rq ./out ./out.gz.433.24.ref
+python test_functional.p
 
 About
 -----
@@ -91,4 +84,4 @@ Create an esecutable file
 
 pip install pyinstaller
 
-pyinstaller --onefile --noconsole log2files.py
+pyinstaller --onefile log2files.py
