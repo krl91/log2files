@@ -1,22 +1,24 @@
 import argparse
 import os
-import sys
 import shutil
 import gzip
 import tarfile
 import re
-from collections import defaultdict
-from lxml import etree
-from pathlib import Path
-from utils import Config
-import tkinter as tk
-from tkinter import filedialog, messagebox
-from tqdm import tqdm
 import webbrowser
 import base64
+from collections import defaultdict
+from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog, messagebox
+
+from lxml import etree
+from tqdm import tqdm
+
+from utils import Config
+
 
 DEFAULT_CONFIG_PATH = "config.json"
-CURRENT_VERSION = "v1.0.3"
+CURRENT_VERSION = "v1.0.4r"
 
 def extract_element_number(element_ref):
     """Extract the element number from an element reference."""
