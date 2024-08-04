@@ -3,8 +3,6 @@ from unittest.mock import patch, mock_open, MagicMock
 from collections import defaultdict
 from pathlib import Path
 import tempfile
-import gzip
-import tarfile
 from log2files import (
     extract_element_number, extract_timestamp, write_xml_fragment,
     process_xml_fragment, process_xml_content, read_file_content,
