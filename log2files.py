@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 import shutil
 import gzip
 import tarfile
@@ -11,14 +12,23 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
+import logging
 from lxml import etree
 from tqdm import tqdm
 
 from utils import Config
 
-
 DEFAULT_CONFIG_PATH = "config.json"
-CURRENT_VERSION = "v1.0.4r"
+CURRENT_VERSION = "v1.0.3"
+
+def setup_logging(debug):
+    """Setup logging configuration based on the debug flag."""
+    if debug:
+        logging.basicConfig(filename="log2files_debug.log", level=logging.DEBUG,
+                            format="%(asctime)s - %(levelname)s - %(message)s")
+        logging.debug("Debugging mode activated.")
+    else:
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def extract_element_number(element_ref):
     """Extract the element number from an element reference."""
@@ -39,6 +49,7 @@ def write_xml_fragment(output_dir, element_number, fragment, timestamp, file_cou
     with open(filename, 'w', encoding='utf-8') as xml_file:
         xml_file.write(fragment)
     file_counters[element_number] += 1
+    logging.info("Wrote fragment for element %s to %s", element_number, filename)
 
 def process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, config, timestamp, file_counters):
     """Process and save an XML fragment if it matches the filter criteria."""
@@ -46,18 +57,22 @@ def process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, con
         root = etree.fromstring(fragment)
         element_ref = root.find(config.ELEMENT_REF_XPATH).text
         element_number = extract_element_number(element_ref)
+        logging.debug("Processing fragment for element number: %s", element_number)
         if not filtered_element_numbers_set or element_number in filtered_element_numbers_set:
+            logging.debug("Element number %s is within the filter set.", element_number)
             write_xml_fragment(output_dir, element_number, fragment, timestamp, file_counters)
+        else:
+            logging.debug("Element number %s is filtered out.", element_number)
     except AttributeError:
-        print("Skipping fragment: Missing markup reference")
+        logging.warning("Skipping fragment: Missing markup reference")
     except Exception as e:
-        print(f"Error processing XML fragment: {e}")
+        logging.error("Error processing XML fragment: %s", e)
 
 def process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters):
     """Process the entire XML content, extracting and handling relevant fragments."""
     xml_fragments = config.XML_PATTERN.findall(xml_content)
-    #for fragment in tqdm(xml_fragments, desc="Processing xml_fragments", unit="fragment"):
-    for fragment in xml_fragments:
+    logging.debug("Found %d XML fragments to process", len(xml_fragments))
+    for fragment in tqdm(xml_fragments, desc="Processing xml_fragments", unit="fragment", leave=False):
         process_xml_fragment(fragment, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
 def get_pu():
@@ -94,7 +109,7 @@ def process_tar_member(tar, member, output_dir, filtered_element_numbers_set, co
     if f:
         xml_content = f.read().decode('utf-8')
         timestamp = extract_timestamp(xml_content)
-        file_counters = defaultdict(int) 
+        file_counters = defaultdict(int)
         process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
 
 def initialize_output_dir(output_dir):
@@ -112,6 +127,7 @@ def process_files(trace_file_path, output_dir_path, filtered_element_numbers, co
     filtered_element_numbers_set = set(filtered_element_numbers.split(';')) if filtered_element_numbers else set()
     file_counters = defaultdict(int)
 
+    logging.debug("Starting to process %s", trace_file_path)
     if trace_file_path.suffix == '.gz':
         process_compressed_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters)
     elif trace_file_path.suffix == '.tar.gz':
@@ -121,7 +137,7 @@ def process_files(trace_file_path, output_dir_path, filtered_element_numbers, co
 
 def process_compressed_log_file(trace_file_path, output_dir, filtered_element_numbers_set, config, file_counters):
     """Process a compressed log file (e.g., .gz), extracting and processing XML content."""
-    print(f"Processing compressed log file: {trace_file_path}")
+    logging.info("Processing compressed log file: %s", trace_file_path)
     xml_content = read_file_content(trace_file_path)
     timestamp = extract_timestamp(xml_content)
     process_xml_content(xml_content, output_dir, filtered_element_numbers_set, config, timestamp, file_counters)
@@ -133,7 +149,8 @@ def process_log_file(trace_file_path, output_dir, filtered_element_numbers_set, 
 
     with open(trace_file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
-        for line in tqdm(lines, desc="Processing log lines", unit="line"):
+        logging.debug("Starting to process %d lines from the log file", len(lines))
+        for line in tqdm(lines, desc="Processing log lines", unit="line", leave=False):
             current_timestamp, current_fragment = process_log_line(
                 line, current_timestamp, current_fragment, output_dir, filtered_element_numbers_set, config, file_counters
             )
@@ -161,49 +178,51 @@ def process_final_fragment(current_fragment, current_timestamp, output_dir, filt
 
 def main(args):
     """Load the configuration and either start the CLI or GUI based on the arguments."""
+    setup_logging(args.debug)
+
     if args.version:
         print(CURRENT_VERSION)
-        exit()
-    
-    print("Starting...")
+        sys.exit()
+
+    logging.info("Starting...")
 
     config_path = args.config_path if args.config_path else DEFAULT_CONFIG_PATH
     config = Config(config_path)
-    print(f"Config loaded: {config}")
-    print(f"Globals initialized: XML_PATTERN={config.XML_PATTERN}, element_REF_XPATH={config.ELEMENT_REF_XPATH}")
+    logging.info("Config loaded: %s", config)
+    logging.info("Globals initialized: XML_PATTERN=%s, element_REF_XPATH=%s", config.XML_PATTERN, config.ELEMENT_REF_XPATH)
 
     if args.cli:
         process_files(args.trace_file_path, args.output_dir, args.filtered_element_numbers, config)
     else:
-        print("Loading GUI...")
+        logging.info("Loading GUI...")
         launch_gui(config)
-    
-    print(get_pu())
+
+    logging.info(get_pu())
 
 def launch_gui(config):
     """Launch the GUI interface for user interaction."""
-    
+
     def browse_trace_file():
         file_path = filedialog.askopenfilename(filetypes=[("Log Files", "*.log *.gz"), ("All Files", "*.*")])
         if file_path:
             trace_file_entry.delete(0, tk.END)
             trace_file_entry.insert(0, file_path)
-    
+
     def browse_output_dir():
         directory = filedialog.askdirectory()
         if directory:
             output_dir_entry.delete(0, tk.END)
             output_dir_entry.insert(0, directory)
-    
+
     def process_files_gui():
         trace_file_path = trace_file_entry.get()
         output_dir = output_dir_entry.get()
         filtered_element_numbers = filtered_element_numbers_entry.get()
-        
+
         if not trace_file_path:
             messagebox.showerror("Error", "Please select a trace file.")
             return
-        
+
         try:
             process_files(trace_file_path, output_dir, filtered_element_numbers, config)
             messagebox.showinfo("Success", "File processing completed successfully.")
@@ -216,7 +235,7 @@ def launch_gui(config):
     # Create the main window for the GUI
     root = tk.Tk()
     root.title("Log File Extractor")
-    
+
     # Trace file selection
     tk.Label(root, text="Trace File:").grid(row=0, column=0, padx=10, pady=10, sticky="e")
     trace_file_entry = tk.Entry(root, width=50)
@@ -230,7 +249,7 @@ def launch_gui(config):
     output_dir_entry.grid(row=1, column=1, padx=10, pady=10)
     browse_output_button = tk.Button(root, text="Browse...", command=browse_output_dir)
     browse_output_button.grid(row=1, column=2, padx=10, pady=10)
-    
+
     # Filtered element numbers input
     tk.Label(root, text="Filtered Element Numbers:").grid(row=2, column=0, padx=10, pady=10, sticky="e")
     filtered_element_numbers_entry = tk.Entry(root, width=50)
@@ -244,7 +263,7 @@ def launch_gui(config):
     github_link = tk.Label(root, text=get_pu(), fg="blue", cursor="hand2")
     github_link.grid(row=4, column=1, pady=10)
     github_link.bind("<Button-1>", open_g_l)
-    
+
     root.mainloop()
 
 if __name__ == "__main__":
@@ -255,6 +274,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", type=str, default="out", help="Output directory")
     parser.add_argument("--filtered_element_numbers", type=str, default="", help="Filtered element numbers")
     parser.add_argument("--version", action="store_true", help="current version number")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
     main(args)
