@@ -270,7 +270,8 @@ def launch_gui(config):
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
 
-    def open_g_l():
+    def open_g_l(nothing):
+        print(f"open_g_l({nothing})")
         webbrowser.open_new(get_pu())
 
     # Create the main window for the GUI
