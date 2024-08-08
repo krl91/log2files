@@ -68,7 +68,7 @@ x, y = pyautogui.center(process_button_location)
 pyautogui.moveTo(int(x/2),int(y/2))
 mouse.click(button.left)
 
-time.sleep(40)
+time.sleep(60)
 
 ok_button_location = pyautogui.locateOnScreen('./test_datasets/ok_button.png', confidence=0.9)
 

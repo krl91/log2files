@@ -39,7 +39,7 @@ from tqdm import tqdm
 from utils import Config
 
 DEFAULT_CONFIG_PATH = "config.json"
-CURRENT_VERSION = "v1.0.4r"
+CURRENT_VERSION = "v1.0.4"
 
 
 def setup_logging(debug):
@@ -59,7 +59,7 @@ def extract_element_number(element_ref):
 
 def extract_timestamp(line):
     """Extract the timestamp from a log line and format it for use in filenames."""
-    match = re.match(r'^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})', line)
+    match = re.match(r'^(\d{4}.\d{2}.\d{2}.\d{2}.\d{2}.\d{2}.\d{3})', line)
     if match:
         timestamp = match.group(1)
         return timestamp.replace(" ", "_").replace(":", "h", 1).replace(":", "m").replace(",", "s")
@@ -105,8 +105,8 @@ def process_xml_content(xml_content, output_dir, filtered_element_numbers_set, c
 
 def get_pu():
     """Return the decoded URL."""
-    encoded_url = b'aHR0cHM6Ly9naXRodWIuY29tL2tybDkxL2xvZzJmaWxlcw=='
-    return base64.b64decode(encoded_url).decode('utf-8')
+    e_ul = b'aHR0cHM6Ly9naXRodWIuY29tL2tybDkxL2xvZzJmaWxlcw=='
+    return base64.b64decode(e_ul).decode('utf-8')
 
 
 def read_file_content(file_path):
@@ -271,12 +271,11 @@ def launch_gui(config):
             messagebox.showerror("Error", f"An error occurred: {e}")
 
     def open_g_l(nothing):
-        print(f"open_g_l({nothing})")
         webbrowser.open_new(get_pu())
 
     # Create the main window for the GUI
     root = tk.Tk()
-    root.title("Log File Extractor")
+    root.title(f"Log File Extractor - {CURRENT_VERSION}")
 
     # Trace file selection
     tk.Label(root, text="Trace File:").grid(row=0, column=0, padx=10, pady=10, sticky="e")
